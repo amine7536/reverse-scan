@@ -1,50 +1,39 @@
 package scanner
 
 import (
-	"fmt"
-	"net"
+	"encoding/csv"
+	"log"
+	"os"
 
 	"bitbucket.org/aminebenseddik/reverse-scan/conf"
+	"bitbucket.org/aminebenseddik/reverse-scan/utils"
 )
 
 func Start(config *conf.Config) {
 
-	fmt.Println(config)
-}
+	log.Printf("Resolving from %v to %v", config.StartIP, config.EndIP)
+	log.Printf("Caluculated CIDR is %s", config.CIDR)
 
-func loopRange(ip net.IP, end string) {
+	mynet, _ := utils.GetHosts(config.CIDR)
+	log.Printf("Number of IPs to scan: %v", len(mynet))
 
-}
-
-// ResolveName get neighbor ip
-func resolveName(ip string) ([]string, error) {
-	// Try to get Neighbor DNS Names
-	names, err := net.LookupAddr(ip)
+	file, err := os.Create(config.CSV)
 	if err != nil {
-		return nil, err
+		log.Fatal(err)
 	}
-	return names, nil
-}
+	defer file.Close()
 
-func Hosts(cidr string) ([]string, error) {
-	ip, ipnet, err := net.ParseCIDR(cidr)
-	if err != nil {
-		return nil, err
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	for _, ip := range mynet {
+		names, _ := utils.ResolveName(ip)
+
+		// err := writer.Write(append([]string{ip}, names...))
+		// if err != nil {
+		// 	log.Fatal(err)
+		// }
+		log.Printf(ip, names)
 	}
 
-	var ips []string
-	for ip := ip.Mask(ipnet.Mask); ipnet.Contains(ip); inc(ip) {
-		ips = append(ips, ip.String())
-	}
-	// remove network address and broadcast address
-	return ips[1 : len(ips)-1], nil
-}
-
-func inc(ip net.IP) {
-	for j := len(ip) - 1; j >= 0; j-- {
-		ip[j]++
-		if ip[j] > 0 {
-			break
-		}
-	}
 }
