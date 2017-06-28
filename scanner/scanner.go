@@ -11,6 +11,8 @@ import (
 
 func Start(config *conf.Config) {
 
+	reverseChan := make(chan []string)
+
 	log.Printf("Resolving from %v to %v", config.StartIP, config.EndIP)
 	log.Printf("Caluculated CIDR is %s", config.CIDR)
 
@@ -26,14 +28,30 @@ func Start(config *conf.Config) {
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 
-	for _, ip := range mynet {
+	go rangeHosts(mynet, reverseChan)
+
+	for {
+		select {
+		case host := <-reverseChan:
+			err := writer.Write(host)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+	}
+
+}
+
+func rangeHosts(hosts []string, reverseChan chan []string) {
+	for _, ip := range hosts {
 		names, _ := utils.ResolveName(ip)
+		reverseChan <- append([]string{ip}, names...)
 
 		// err := writer.Write(append([]string{ip}, names...))
 		// if err != nil {
 		// 	log.Fatal(err)
 		// }
-		log.Printf(ip, names)
+		// log.Printf(ip, names)
 	}
 
 }
