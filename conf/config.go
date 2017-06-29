@@ -15,6 +15,7 @@ type Config struct {
 	EndIP   net.IP
 	CIDR    string
 	CSV     string
+	WORKERS int
 }
 
 // LoadConfig loads the config from a file if specified, otherwise from the environment
@@ -35,7 +36,12 @@ func LoadConfig(cmd *cobra.Command) (*Config, error) {
 		return nil, err
 	}
 
-	config, err := validateConfig(start, end, output)
+	workers, err := cmd.Flags().GetInt("workers")
+	if err != nil {
+		return nil, err
+	}
+
+	config, err := validateConfig(start, end, output, workers)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +49,7 @@ func LoadConfig(cmd *cobra.Command) (*Config, error) {
 	return config, nil
 }
 
-func validateConfig(start string, end string, output string) (*Config, error) {
+func validateConfig(start string, end string, output string, workers int) (*Config, error) {
 	if start == "" {
 		return nil, fmt.Errorf("Must specify start range")
 	}
@@ -83,6 +89,7 @@ func validateConfig(start string, end string, output string) (*Config, error) {
 		EndIP:   endIP,
 		CIDR:    utils.GetCIDR(startIP, endIP),
 		CSV:     output,
+		WORKERS: workers,
 	}
 
 	return &config, nil
