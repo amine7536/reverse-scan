@@ -1,3 +1,5 @@
 package: bitbucket.org/aminebenseddik/reverse-scan
 import:
 - package: github.com/spf13/cobra
+- package: github.com/gosuri/uiprogress
+- package: github.com/gosuri/uilive
