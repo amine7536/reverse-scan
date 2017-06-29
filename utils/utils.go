@@ -86,3 +86,21 @@ func IsValidIP(ip string) (net.IP, error) {
 	}
 	return netIP.To4(), nil
 }
+
+func SplitSlice(logs []string, num int) [][]string {
+	var divided [][]string
+
+	chunkSize := (len(logs) + num - 1) / num
+
+	for i := 0; i < len(logs); i += chunkSize {
+		end := i + chunkSize
+
+		if end > len(logs) {
+			end = len(logs)
+		}
+
+		divided = append(divided, logs[i:end])
+	}
+
+	return divided
+}
