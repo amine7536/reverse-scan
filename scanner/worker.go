@@ -1,9 +1,7 @@
 package scanner
 
 import (
-	"log"
-	"sync"
-	"time"
+	"github.com/amine7536/quasar/utils"
 )
 
 // Worker executes a reverse lookup on a slice of ips
@@ -28,28 +26,26 @@ func NewWorker(workerID int, jobs chan []string, results chan []string, done cha
 }
 
 // Start run the worker
-func (w Worker) Start(wg sync.WaitGroup) {
-	log.Printf("Starting WorkerID=%v", w.ID)
+func (w Worker) Start() {
 	w.Running = true
 	go func() {
-		defer wg.Done()
 
 		for {
 			select {
 			case IPs := <-w.JobChannel:
 				// Send the return of fn in the ResultChannel
 				for _, ip := range IPs {
-					// names, _ := utils.ResolveName(host.IP)
-					names := []string{"toto.com"}
-					time.Sleep(time.Millisecond * 3)
+					names, _ := utils.ResolveName(ip)
+					// names := []string{"toto.com"}
+					// time.Sleep(time.Millisecond * 1)
 					w.ResultChannel <- append([]string{ip}, names...)
 				}
 				// Say that we have done the work
-				// w.Done <- w.ID
+				w.Done <- w.ID
 
 			case <-w.quit:
 				// Stop working
-				log.Printf("Stopping WorkerID=%v", w.ID)
+				// log.Printf("Stopping WorkerID=%v", w.ID)
 				w.Running = false
 				return
 

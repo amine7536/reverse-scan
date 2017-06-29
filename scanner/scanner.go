@@ -4,7 +4,6 @@ import (
 	"encoding/csv"
 	"log"
 	"os"
-	"sync"
 
 	"github.com/gosuri/uiprogress"
 
@@ -13,7 +12,7 @@ import (
 )
 
 const (
-	WORKERS = 4
+	WORKERS = 16
 )
 
 func Start(config *conf.Config) {
@@ -23,7 +22,7 @@ func Start(config *conf.Config) {
 	resultsChan := make(chan []string)
 	doneChan := make(chan int, WORKERS)
 
-	var wg sync.WaitGroup
+	// var wg sync.WaitGroup
 
 	log.Printf("Resolving from %v to %v", config.StartIP, config.EndIP)
 	log.Printf("Caluculated CIDR is %s", config.CIDR)
@@ -36,7 +35,7 @@ func Start(config *conf.Config) {
 	defer file.Close()
 
 	writer := csv.NewWriter(file)
-	//defer writer.Flush()
+	defer writer.Flush()
 
 	uiprogress.Start()
 	bar := uiprogress.AddBar(len(hosts))
@@ -45,17 +44,16 @@ func Start(config *conf.Config) {
 
 	// Split hosts list
 	var workers []Worker
+	var stoppedCount = 0
 
 	for a, b := range utils.SplitSlice(hosts, WORKERS) {
-		wg.Add(1)
 		workers = append(workers, NewWorker(a, jobsChan, resultsChan, doneChan))
-		workers[a].Start(wg)
+		log.Printf("Starting WorkerID=%v with slice lenght=%v", a, len(b))
+		workers[a].Start()
 		workers[a].JobChannel <- b
 	}
 
-	var stoppedCount = 0
-
-	// mainloop:
+mainloop:
 	for {
 		select {
 		case res := <-resultsChan:
@@ -70,14 +68,10 @@ func Start(config *conf.Config) {
 			workers[id].Stop()
 
 			stoppedCount++
-			// if stoppedCount == WORKERS {
-			// 	break mainloop
-			// }
+			if stoppedCount == WORKERS {
+				break mainloop
+			}
 
 		}
 	}
-
-	wg.Wait()
-	// break mainloop
-
 }
