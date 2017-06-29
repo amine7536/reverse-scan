@@ -26,6 +26,7 @@ func NewRootCmd(v string, p string) *cobra.Command {
 	rootCmd.PersistentFlags().StringP("start", "s", "", "Range Start")
 	rootCmd.PersistentFlags().StringP("end", "e", "", "Range End")
 	rootCmd.PersistentFlags().StringP("output", "o", "", "Output File")
+	rootCmd.PersistentFlags().IntP("workers", "w", 16, "Number of Workers")
 
 	return &rootCmd
 }
