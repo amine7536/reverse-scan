@@ -1,50 +1,77 @@
 package scanner
 
 import (
-	"fmt"
-	"net"
+	"encoding/csv"
+	"log"
+	"os"
+	"time"
+
+	"github.com/gosuri/uiprogress"
 
 	"bitbucket.org/aminebenseddik/reverse-scan/conf"
+	"bitbucket.org/aminebenseddik/reverse-scan/utils"
 )
 
 func Start(config *conf.Config) {
 
-	fmt.Println(config)
-}
+	hosts, _ := utils.GetHosts(config.CIDR)
+	jobsChan := make(chan []string)
+	resultsChan := make(chan []string)
+	doneChan := make(chan int, config.WORKERS)
 
-func loopRange(ip net.IP, end string) {
+	// var wg sync.WaitGroup
 
-}
+	log.Printf("Resolving from %v to %v", config.StartIP, config.EndIP)
+	log.Printf("Caluculated CIDR is %s", config.CIDR)
+	log.Printf("Number of IPs to scan: %v", len(hosts))
+	log.Printf("Starting %v Workers", config.WORKERS)
 
-// ResolveName get neighbor ip
-func resolveName(ip string) ([]string, error) {
-	// Try to get Neighbor DNS Names
-	names, err := net.LookupAddr(ip)
+	file, err := os.Create(config.CSV)
 	if err != nil {
-		return nil, err
+		log.Fatal(err)
 	}
-	return names, nil
-}
+	defer file.Close()
 
-func Hosts(cidr string) ([]string, error) {
-	ip, ipnet, err := net.ParseCIDR(cidr)
-	if err != nil {
-		return nil, err
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	uiprogress.Start()
+	bar := uiprogress.AddBar(len(hosts))
+	bar.AppendCompleted()
+	bar.PrependElapsed()
+
+	// Split hosts list
+	var workers []Worker
+	var stoppedCount = 0
+
+	for a, b := range utils.SplitSlice(hosts, config.WORKERS) {
+		workers = append(workers, NewWorker(a, jobsChan, resultsChan, doneChan))
+		// log.("Starting WorkerID=%v with slice lenght=%v", a, len(b))
+		workers[a].Start()
+		workers[a].JobChannel <- b
 	}
 
-	var ips []string
-	for ip := ip.Mask(ipnet.Mask); ipnet.Contains(ip); inc(ip) {
-		ips = append(ips, ip.String())
-	}
-	// remove network address and broadcast address
-	return ips[1 : len(ips)-1], nil
-}
+mainloop:
+	for {
+		select {
+		case res := <-resultsChan:
+			err := writer.Write(append(res))
+			if err != nil {
+				log.Fatal(err)
+			}
+			writer.Flush()
+			bar.Incr()
+		case id := <-doneChan:
+			writer.Flush()
+			workers[id].Stop()
 
-func inc(ip net.IP) {
-	for j := len(ip) - 1; j >= 0; j-- {
-		ip[j]++
-		if ip[j] > 0 {
-			break
+			stoppedCount++
+			if stoppedCount == config.WORKERS {
+				time.Sleep(time.Second) // wait for a second for all the go routines to finish
+				uiprogress.Stop()
+				break mainloop
+			}
+
 		}
 	}
 }
