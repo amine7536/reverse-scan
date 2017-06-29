@@ -4,7 +4,7 @@ import (
 	"encoding/csv"
 	"log"
 	"os"
-	"time"
+	"sync"
 
 	"github.com/gosuri/uiprogress"
 
@@ -12,16 +12,22 @@ import (
 	"bitbucket.org/aminebenseddik/reverse-scan/utils"
 )
 
+const (
+	WORKERS = 4
+)
+
 func Start(config *conf.Config) {
 
-	reverseChan := make(chan []string)
-	flushChan := make(chan bool)
+	hosts, _ := utils.GetHosts(config.CIDR)
+	jobsChan := make(chan []string)
+	resultsChan := make(chan []string)
+	doneChan := make(chan int, WORKERS)
+
+	var wg sync.WaitGroup
 
 	log.Printf("Resolving from %v to %v", config.StartIP, config.EndIP)
 	log.Printf("Caluculated CIDR is %s", config.CIDR)
-
-	mynet, _ := utils.GetHosts(config.CIDR)
-	log.Printf("Number of IPs to scan: %v", len(mynet))
+	log.Printf("Number of IPs to scan: %v", len(hosts))
 
 	file, err := os.Create(config.CSV)
 	if err != nil {
@@ -30,47 +36,48 @@ func Start(config *conf.Config) {
 	defer file.Close()
 
 	writer := csv.NewWriter(file)
-	defer writer.Flush()
+	//defer writer.Flush()
 
-	uiprogress.Start()                   // start rendering
-	bar := uiprogress.AddBar(len(mynet)) // Add a new bar
+	uiprogress.Start()
+	bar := uiprogress.AddBar(len(hosts))
 	bar.AppendCompleted()
 	bar.PrependElapsed()
 
-	go rangeHosts(mynet, reverseChan, flushChan)
+	// Split hosts list
+	var workers []Worker
 
-mainloop:
+	for a, b := range utils.SplitSlice(hosts, WORKERS) {
+		wg.Add(1)
+		workers = append(workers, NewWorker(a, jobsChan, resultsChan, doneChan))
+		workers[a].Start(wg)
+		workers[a].JobChannel <- b
+	}
+
+	var stoppedCount = 0
+
+	// mainloop:
 	for {
 		select {
-		case host := <-reverseChan:
-			err := writer.Write(host)
+		case res := <-resultsChan:
+			err := writer.Write(append(res))
 			if err != nil {
 				log.Fatal(err)
 			}
-			bar.Incr()
-		case <-flushChan:
 			writer.Flush()
-			break mainloop
+			bar.Incr()
+		case id := <-doneChan:
+			writer.Flush()
+			workers[id].Stop()
+
+			stoppedCount++
+			// if stoppedCount == WORKERS {
+			// 	break mainloop
+			// }
+
 		}
 	}
 
-}
-
-func rangeHosts(hosts []string, reverseChan chan []string, flushChan chan bool) {
-	for _, ip := range hosts {
-		// names, _ := utils.ResolveName(ip)
-		// reverseChan <- append([]string{ip}, names...)
-		names := []string{"toto.com"}
-		reverseChan <- append([]string{ip}, names...)
-		time.Sleep(time.Millisecond * 20)
-
-		// err := writer.Write(append([]string{ip}, names...))
-		// if err != nil {
-		// 	log.Fatal(err)
-		// }
-		// log.Printf(ip, names)
-	}
-
-	flushChan <- true
+	wg.Wait()
+	// break mainloop
 
 }
