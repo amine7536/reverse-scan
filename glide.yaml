@@ -1,4 +1,4 @@
-package: bitbucket.org/aminebenseddik/reverse-scan
+package: github.com/amine7536/reverse-scan
 import:
 - package: github.com/spf13/cobra
 - package: github.com/gosuri/uiprogress

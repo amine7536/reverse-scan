@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net"
 
-	"bitbucket.org/aminebenseddik/reverse-scan/utils"
+	"github.com/amine7536/reverse-scan/utils"
 
 	"github.com/spf13/cobra"
 )
