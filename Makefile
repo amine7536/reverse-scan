@@ -15,4 +15,4 @@ image:
 	docker build -t reverse-scan .
 
 build:
-	docker run -v $(pwd):/go/src/github.com/amine7536/reverse-scan -it quasar make
+	docker run -v $(pwd)/build:/go/src/github.com/amine7536/reverse-scan/build -it reverse-scan make
