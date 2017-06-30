@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"bitbucket.org/aminebenseddik/reverse-scan/cmd"
+	"github.com/amine7536/reverse-scan/cmd"
 )
 
 const (

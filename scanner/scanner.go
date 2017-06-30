@@ -7,8 +7,8 @@ import (
 
 	"github.com/gosuri/uiprogress"
 
-	"bitbucket.org/aminebenseddik/reverse-scan/conf"
-	"bitbucket.org/aminebenseddik/reverse-scan/utils"
+	"github.com/amine7536/reverse-scan/conf"
+	"github.com/amine7536/reverse-scan/utils"
 )
 
 func Start(config *conf.Config) {

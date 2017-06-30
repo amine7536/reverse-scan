@@ -1,7 +1,7 @@
 package scanner
 
 import (
-	"bitbucket.org/aminebenseddik/reverse-scan/utils"
+	"github.com/amine7536/reverse-scan/utils"
 )
 
 type Job struct {
