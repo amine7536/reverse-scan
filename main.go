@@ -8,7 +8,7 @@ import (
 
 const (
 	// Version : app version
-	Version = "0.1.0"
+	Version = "0.2.1"
 	// ProgramName : app name
 	ProgramName = "Reverse-Scan"
 )
