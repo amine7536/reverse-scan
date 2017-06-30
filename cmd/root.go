@@ -2,9 +2,10 @@ package cmd
 
 import (
 	"log"
+	"os"
 
-	"bitbucket.org/aminebenseddik/reverse-scan/conf"
-	"bitbucket.org/aminebenseddik/reverse-scan/scanner"
+	"github.com/amine7536/reverse-scan/conf"
+	"github.com/amine7536/reverse-scan/scanner"
 	"github.com/spf13/cobra"
 )
 
@@ -38,4 +39,5 @@ func run(cmd *cobra.Command, args []string) {
 	}
 
 	scanner.Start(config)
+	os.Exit(0)
 }

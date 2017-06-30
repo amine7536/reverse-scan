@@ -1,52 +1,50 @@
 package scanner
 
 import (
-	"github.com/amine7536/quasar/utils"
+	"github.com/amine7536/reverse-scan/utils"
 )
+
+type Job struct {
+	IP    string
+	Names []string
+}
 
 // Worker executes a reverse lookup on a slice of ips
 type Worker struct {
 	ID            int
-	Running       bool
-	JobChannel    chan []string
-	ResultChannel chan []string
-	Done          chan int
+	WorkerPool    chan chan Job
+	JobChannel    chan Job
+	ResultChannel chan Job
 	quit          chan bool
 }
 
 // NewWorker returns a new Worker
-func NewWorker(workerID int, jobs chan []string, results chan []string, done chan int) Worker {
+func NewWorker(id int, workerPool chan chan Job, resultQueue *chan Job) Worker {
 	return Worker{
-		ID:            workerID,
-		JobChannel:    jobs,
-		ResultChannel: results,
-		Done:          done,
+		ID:            id,
+		WorkerPool:    workerPool,
+		JobChannel:    make(chan Job),
+		ResultChannel: *resultQueue,
 		quit:          make(chan bool),
 	}
 }
 
 // Start run the worker
 func (w Worker) Start() {
-	w.Running = true
 	go func() {
-
 		for {
+			// register the current worker into the worker queue.
+			w.WorkerPool <- w.JobChannel
+
 			select {
-			case IPs := <-w.JobChannel:
+			case job := <-w.JobChannel:
 				// Send the return of fn in the ResultChannel
-				for _, ip := range IPs {
-					names, _ := utils.ResolveName(ip)
-					// names := []string{"toto.com"}
-					// time.Sleep(time.Millisecond * 1)
-					w.ResultChannel <- append([]string{ip}, names...)
-				}
-				// Say that we have done the work
-				w.Done <- w.ID
+				job.Names, _ = utils.ResolveName(job.IP)
+				w.ResultChannel <- job
 
 			case <-w.quit:
 				// Stop working
 				// log.Printf("Stopping WorkerID=%v", w.ID)
-				w.Running = false
 				return
 
 			}

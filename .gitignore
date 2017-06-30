@@ -26,3 +26,5 @@ _testmain.go
 .vagrant
 
 vendor
+
+reverse-scan
