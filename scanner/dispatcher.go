@@ -11,14 +11,13 @@ type Dispatcher struct {
 }
 
 func NewDispatcher(maxWorkers int, results chan Job) *Dispatcher {
-	pool := make(chan chan Job, maxWorkers)
-	jobs := make(chan Job)
 
 	return &Dispatcher{
 		MaxWorkers:  maxWorkers,
-		WorkerPool:  pool,
-		JobQueue:    jobs,
+		WorkerPool:  make(chan chan Job, maxWorkers),
+		JobQueue:    make(chan Job),
 		ResultQueue: results,
+		quit:        make(chan bool),
 	}
 }
 
