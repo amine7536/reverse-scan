@@ -2,6 +2,7 @@ all: reverse-scan
 
 GO ?= go
 GOTEST = go test -v -bench\=.
+WORKDIR ?= $(shell pwd)
 
 reverse-scan:
 	mkdir -p build
@@ -14,5 +15,5 @@ clean:
 image:
 	docker build -t reverse-scan .
 
-build:
-	docker run -v $(pwd)/build:/go/src/github.com/amine7536/reverse-scan/build -it reverse-scan make
+build: image
+	docker run -v $(WORKDIR):/go/src/github.com/amine7536/reverse-scan -it reverse-scan
