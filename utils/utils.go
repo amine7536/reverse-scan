@@ -32,7 +32,7 @@ func inc(ip net.IP) {
 	}
 }
 
-// GetCIDR
+// GetCIDR get CIDR from ip range
 func GetCIDR(start net.IP, end net.IP) string {
 	var cidrString string
 	maxLen := 32
