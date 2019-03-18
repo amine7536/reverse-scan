@@ -8,14 +8,12 @@ import (
 
 const (
 	// Version : app version
-	Version = "0.2.1"
-	// ProgramName : app name
-	ProgramName = "Reverse-Scan"
+	Version = "0.2.2"
 )
 
 func main() {
 
-	if err := cmd.NewRootCmd(Version, ProgramName).Execute(); err != nil {
+	if err := cmd.NewRootCmd(Version).Execute(); err != nil {
 		log.Fatal(err)
 	}
 }

@@ -1,7 +1,7 @@
-package scanner
+package queue
 
+// Dispatcher dispatchs jobs to worker
 type Dispatcher struct {
-	// A pool of workers channels that are registered with the dispatcher
 	MaxWorkers  int
 	WorkerPool  chan chan Job
 	JobQueue    chan Job
@@ -10,6 +10,7 @@ type Dispatcher struct {
 	Workers     []Worker
 }
 
+// NewDispatcher returns a new dispatcher
 func NewDispatcher(maxWorkers int, results chan Job) *Dispatcher {
 
 	return &Dispatcher{
@@ -21,6 +22,7 @@ func NewDispatcher(maxWorkers int, results chan Job) *Dispatcher {
 	}
 }
 
+// Run starts the dispatcher
 func (d *Dispatcher) Run() {
 	// starting n number of workers
 	for i := 0; i < d.MaxWorkers; i++ {
@@ -55,6 +57,7 @@ func (d *Dispatcher) dispatch() {
 	}
 }
 
+// Stop stops the dispatcher and all workers
 func (d *Dispatcher) Stop() {
 	go func() {
 		d.quit <- true
