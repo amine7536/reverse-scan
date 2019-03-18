@@ -20,7 +20,7 @@ Usage :
 
 ```bash
 ./reverse-scan --help
-Revere Lookup
+Reverse Scan
 
 Usage:
   reverse-scan [flags]
@@ -31,13 +31,13 @@ Available Commands:
   version     Print the version number
 
 Flags:
-  -e, --end string      Range End
+  -e, --end string      ip range end
   -h, --help            help for reverse-scan
-  -o, --output string   Output File
-  -s, --start string    Range Start
-  -w, --workers int     Number of Workers (default 16)
+  -o, --output string   csv output file
+  -s, --start string    ip range start
+  -w, --workers int     number of workers (default 8)
 
-Use "reverse-scan [command] --help" for more information about a command.
+Use "reverse-scan [command] --help" for more information about a command
 ```
 
 Run :
@@ -51,5 +51,5 @@ Run :
    9s [======================================================>-------------]  81%
 ```
 
-You specify the number of workers with the option `-w`, by default the utility start with 16 workers.
+You specify the number of workers with the option `-w`, by default the utility start with 8 workers.
 You must also specify an output CSV file.

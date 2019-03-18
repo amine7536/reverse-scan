@@ -1,7 +1,7 @@
-package scanner
+package queue
 
 import (
-	"github.com/amine7536/reverse-scan/utils"
+	"github.com/amine7536/reverse-scan/pkg/utils"
 )
 
 type Job struct {

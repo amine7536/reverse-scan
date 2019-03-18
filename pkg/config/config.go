@@ -1,10 +1,10 @@
-package conf
+package config
 
 import (
 	"fmt"
 	"net"
 
-	"github.com/amine7536/reverse-scan/utils"
+	"github.com/amine7536/reverse-scan/pkg/utils"
 
 	"github.com/spf13/cobra"
 )

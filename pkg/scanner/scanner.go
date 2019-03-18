@@ -7,22 +7,24 @@ import (
 
 	"github.com/gosuri/uiprogress"
 
-	"github.com/amine7536/reverse-scan/conf"
-	"github.com/amine7536/reverse-scan/utils"
+	"github.com/amine7536/reverse-scan/pkg/config"
+	"github.com/amine7536/reverse-scan/pkg/queue"
+	"github.com/amine7536/reverse-scan/pkg/utils"
 )
 
-func Start(config *conf.Config) {
+// Start scanner
+func Start(c *config.Config) {
 
-	hosts, _ := utils.GetHosts(config.CIDR)
-	results := make(chan Job)
+	hosts, _ := utils.GetHosts(c.CIDR)
+	results := make(chan queue.Job)
 	defer close(results)
 
-	log.Printf("Resolving from %v to %v", config.StartIP, config.EndIP)
-	log.Printf("Caluculated CIDR is %s", config.CIDR)
+	log.Printf("Resolving from %v to %v", c.StartIP, c.EndIP)
+	log.Printf("Caluculated CIDR is %s", c.CIDR)
 	log.Printf("Number of IPs to scan: %v", len(hosts))
-	log.Printf("Starting %v Workers", config.WORKERS)
+	log.Printf("Starting %v Workers", c.WORKERS)
 
-	file, err := os.Create(config.CSV)
+	file, err := os.Create(c.CSV)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -37,14 +39,14 @@ func Start(config *conf.Config) {
 	bar.AppendCompleted()
 	bar.PrependElapsed()
 
-	dispatch := NewDispatcher(config.WORKERS, results)
+	dispatch := queue.NewDispatcher(c.WORKERS, results)
 	dispatch.Run()
 	defer dispatch.Stop()
 	// time.Sleep(time.Second * 10)
 
 	// Send Jobs to Dispatch
 	for _, ip := range hosts {
-		work := Job{IP: ip}
+		work := queue.Job{IP: ip}
 		dispatch.JobQueue <- work
 	}
 
