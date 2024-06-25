@@ -2,7 +2,6 @@ package utils
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net"
 	"os"
 )
@@ -70,8 +69,10 @@ func IsValidPath(fp string) bool {
 
 	// Attempt to create it
 	var d []byte
-	if err := ioutil.WriteFile(fp, d, 0644); err == nil {
-		os.Remove(fp) // And delete it
+	if err := os.WriteFile(fp, d, 0o600); err == nil {
+		if err := os.Remove(fp); err != nil {
+			return false
+		}
 		return true
 	}
 
