@@ -12,7 +12,6 @@ type Dispatcher struct {
 
 // NewDispatcher returns a new dispatcher
 func NewDispatcher(maxWorkers int, results chan Job) *Dispatcher {
-
 	return &Dispatcher{
 		MaxWorkers:  maxWorkers,
 		WorkerPool:  make(chan chan Job, maxWorkers),

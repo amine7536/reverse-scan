@@ -5,7 +5,6 @@ import (
 	"net"
 
 	"github.com/amine7536/reverse-scan/pkg/utils"
-
 	"github.com/spf13/cobra"
 )
 
@@ -20,7 +19,6 @@ type Config struct {
 
 // LoadConfig loads the config from a file if specified, otherwise from the environment
 func LoadConfig(cmd *cobra.Command) (*Config, error) {
-
 	start, err := cmd.Flags().GetString("start")
 	if err != nil {
 		return nil, err
@@ -81,7 +79,7 @@ func validateConfig(start string, end string, output string, workers int) (*Conf
 	}
 
 	if !utils.IsValidPath(output) {
-		return nil, fmt.Errorf("Invalid output file : %s", output)
+		return nil, fmt.Errorf("Invalid output file: %s", output)
 	}
 
 	config := Config{

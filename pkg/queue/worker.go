@@ -46,7 +46,6 @@ func (w Worker) Start() {
 				// Stop working
 				// log.Printf("Stopping WorkerID=%v", w.ID)
 				return
-
 			}
 		}
 	}()
