@@ -6,8 +6,8 @@ import (
 
 // Job represents a DNS lookup job
 type Job struct {
-	Names []string
 	IP    string
+	Names []string
 }
 
 // Worker executes a reverse lookup on a slice of ips

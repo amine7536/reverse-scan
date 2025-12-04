@@ -20,7 +20,6 @@ func Start(c *config.Config) {
 	}
 
 	results := make(chan queue.Job)
-	defer close(results)
 
 	log.Printf("Resolving from %v to %v", c.StartIP, c.EndIP)
 	log.Printf("Calculated CIDR is %s", c.CIDR)

@@ -16,9 +16,9 @@ func TestValidateConfig(t *testing.T) {
 		start   string
 		end     string
 		output  string
+		errMsg  string
 		workers int
 		wantErr bool
-		errMsg  string
 	}{
 		{
 			name:    "valid config",

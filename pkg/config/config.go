@@ -11,10 +11,10 @@ import (
 
 // Config the application's configuration
 type Config struct {
-	StartIP net.IP
-	EndIP   net.IP
 	CIDR    string
 	CSV     string
+	StartIP net.IP
+	EndIP   net.IP
 	WORKERS int
 }
 

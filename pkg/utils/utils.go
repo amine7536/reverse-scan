@@ -70,7 +70,9 @@ func IsValidPath(fp string) bool {
 	// Attempt to create it
 	var d []byte
 	if err := os.WriteFile(fp, d, 0644); err == nil {
-		_ = os.Remove(fp) // And delete it (ignore error as file may not exist)
+		// Clean up test file - ignore error as it's not critical
+		//nolint:errcheck
+		os.Remove(fp)
 		return true
 	}
 
