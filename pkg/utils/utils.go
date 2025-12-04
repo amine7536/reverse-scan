@@ -2,12 +2,11 @@ package utils
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net"
 	"os"
 )
 
-// GetHosts
+// GetHosts returns all IP addresses in a given CIDR range
 func GetHosts(cidr string) ([]string, error) {
 	ip, ipnet, err := net.ParseCIDR(cidr)
 	if err != nil {
@@ -15,8 +14,8 @@ func GetHosts(cidr string) ([]string, error) {
 	}
 
 	var ips []string
-	for ip := ip.Mask(ipnet.Mask); ipnet.Contains(ip); inc(ip) {
-		ips = append(ips, ip.String())
+	for currentIP := ip.Mask(ipnet.Mask); ipnet.Contains(currentIP); inc(currentIP) {
+		ips = append(ips, currentIP.String())
 	}
 	// remove network address and broadcast address
 	// return ips[1 : len(ips)-1], nil
@@ -32,8 +31,8 @@ func inc(ip net.IP) {
 	}
 }
 
-// GetCIDR get CIDR from ip range
-func GetCIDR(start net.IP, end net.IP) string {
+// GetCIDR calculates CIDR notation from an IP range
+func GetCIDR(start, end net.IP) string {
 	var cidrString string
 	maxLen := 32
 
@@ -51,7 +50,7 @@ func GetCIDR(start net.IP, end net.IP) string {
 	return cidrString
 }
 
-// ResolveName get neighbor ip
+// ResolveName performs reverse DNS lookup for an IP address
 func ResolveName(ip string) ([]string, error) {
 	// Try to get Neighbor DNS Names
 	names, err := net.LookupAddr(ip)
@@ -70,23 +69,24 @@ func IsValidPath(fp string) bool {
 
 	// Attempt to create it
 	var d []byte
-	if err := ioutil.WriteFile(fp, d, 0644); err == nil {
-		os.Remove(fp) // And delete it
+	if err := os.WriteFile(fp, d, 0644); err == nil {
+		_ = os.Remove(fp) // And delete it (ignore error as file may not exist)
 		return true
 	}
 
 	return false
 }
 
-// IsValidIP Validate Input IP
+// IsValidIP validates an input IP address
 func IsValidIP(ip string) (net.IP, error) {
 	netIP := net.ParseIP(ip)
 	if netIP == nil {
-		return nil, fmt.Errorf("Invalid IP : %s", ip)
+		return nil, fmt.Errorf("invalid IP: %q", ip)
 	}
 	return netIP.To4(), nil
 }
 
+// SplitSlice divides a slice into num chunks
 func SplitSlice(logs []string, num int) [][]string {
 	var divided [][]string
 

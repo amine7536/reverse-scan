@@ -14,21 +14,28 @@ import (
 
 // Start scanner
 func Start(c *config.Config) {
+	hosts, err := utils.GetHosts(c.CIDR)
+	if err != nil {
+		log.Fatalf("Failed to get hosts: %v", err)
+	}
 
-	hosts, _ := utils.GetHosts(c.CIDR)
 	results := make(chan queue.Job)
 	defer close(results)
 
 	log.Printf("Resolving from %v to %v", c.StartIP, c.EndIP)
-	log.Printf("Caluculated CIDR is %s", c.CIDR)
+	log.Printf("Calculated CIDR is %s", c.CIDR)
 	log.Printf("Number of IPs to scan: %v", len(hosts))
 	log.Printf("Starting %v Workers", c.WORKERS)
 
 	file, err := os.Create(c.CSV)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed to create output file: %v", err)
 	}
-	defer file.Close()
+	defer func() {
+		if err := file.Close(); err != nil {
+			log.Printf("Warning: failed to close file: %v", err)
+		}
+	}()
 
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
@@ -51,22 +58,13 @@ func Start(c *config.Config) {
 	}
 
 	// Wait for results
-	r := 0
-resultLoop:
-	for {
-		select {
-		case job := <-results:
-			err := writer.Write(append([]string{job.IP}, job.Names...))
-			if err != nil {
-				log.Fatal(err)
-			}
-			writer.Flush()
-			bar.Incr()
-			r++
-			if r == len(hosts) {
-				// We got all jobs back, we stop
-				break resultLoop
-			}
+	for r := 0; r < len(hosts); r++ {
+		job := <-results
+		err := writer.Write(append([]string{job.IP}, job.Names...))
+		if err != nil {
+			log.Fatalf("Failed to write result: %v", err)
 		}
+		writer.Flush()
+		bar.Incr()
 	}
 }
