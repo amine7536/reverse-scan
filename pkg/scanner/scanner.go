@@ -40,7 +40,6 @@ func Start(c *config.Config) {
 	defer writer.Flush()
 
 	uiprogress.Start()
-	defer uiprogress.Stop()
 	bar := uiprogress.AddBar(len(hosts))
 	bar.AppendCompleted()
 	bar.PrependElapsed()
@@ -58,6 +57,7 @@ func Start(c *config.Config) {
 	for r := 0; r < len(hosts); r++ {
 		job := <-results
 		if err := writer.Write(append([]string{job.IP}, job.Names...)); err != nil {
+			uiprogress.Stop()
 			dispatch.Stop()
 			log.Fatalf("Failed to write result: %v", err)
 		}
@@ -65,5 +65,6 @@ func Start(c *config.Config) {
 		bar.Incr()
 	}
 
+	uiprogress.Stop()
 	dispatch.Stop()
 }
