@@ -47,8 +47,6 @@ func Start(c *config.Config) {
 
 	dispatch := queue.NewDispatcher(c.WORKERS, results)
 	dispatch.Run()
-	defer dispatch.Stop()
-	// time.Sleep(time.Second * 10)
 
 	// Send Jobs to Dispatch
 	for _, ip := range hosts {
@@ -59,11 +57,13 @@ func Start(c *config.Config) {
 	// Wait for results
 	for r := 0; r < len(hosts); r++ {
 		job := <-results
-		err := writer.Write(append([]string{job.IP}, job.Names...))
-		if err != nil {
+		if err := writer.Write(append([]string{job.IP}, job.Names...)); err != nil {
+			dispatch.Stop()
 			log.Fatalf("Failed to write result: %v", err)
 		}
 		writer.Flush()
 		bar.Incr()
 	}
+
+	dispatch.Stop()
 }
