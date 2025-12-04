@@ -37,7 +37,6 @@ func Start(c *config.Config) {
 	}()
 
 	writer := csv.NewWriter(file)
-	defer writer.Flush()
 
 	uiprogress.Start()
 	bar := uiprogress.AddBar(len(hosts))
@@ -57,6 +56,7 @@ func Start(c *config.Config) {
 	for r := 0; r < len(hosts); r++ {
 		job := <-results
 		if err := writer.Write(append([]string{job.IP}, job.Names...)); err != nil {
+			writer.Flush()
 			uiprogress.Stop()
 			dispatch.Stop()
 			log.Fatalf("Failed to write result: %v", err)
@@ -65,6 +65,7 @@ func Start(c *config.Config) {
 		bar.Incr()
 	}
 
+	writer.Flush()
 	uiprogress.Stop()
 	dispatch.Stop()
 }
