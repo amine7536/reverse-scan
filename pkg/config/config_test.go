@@ -217,6 +217,10 @@ func TestValidateConfigFileCreation(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create output file at %v: %v", config.CSV, err)
 	}
-	_ = file.Close()
-	_ = os.Remove(config.CSV)
+	if err := file.Close(); err != nil {
+		t.Errorf("Failed to close file: %v", err)
+	}
+	if err := os.Remove(config.CSV); err != nil {
+		t.Errorf("Failed to remove test file: %v", err)
+	}
 }
