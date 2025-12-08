@@ -30,11 +30,6 @@ func Start(c *config.Config) {
 	if err != nil {
 		log.Fatalf("Failed to create output file: %v", err)
 	}
-	defer func() {
-		if err := file.Close(); err != nil {
-			log.Printf("Warning: failed to close file: %v", err)
-		}
-	}()
 
 	writer := csv.NewWriter(file)
 
@@ -57,6 +52,9 @@ func Start(c *config.Config) {
 		job := <-results
 		if err := writer.Write(append([]string{job.IP}, job.Names...)); err != nil {
 			writer.Flush()
+			if closeErr := file.Close(); closeErr != nil {
+				log.Printf("Warning: failed to close file: %v", closeErr)
+			}
 			uiprogress.Stop()
 			dispatch.Stop()
 			log.Fatalf("Failed to write result: %v", err)
@@ -66,6 +64,9 @@ func Start(c *config.Config) {
 	}
 
 	writer.Flush()
+	if err := file.Close(); err != nil {
+		log.Printf("Warning: failed to close file: %v", err)
+	}
 	uiprogress.Stop()
 	dispatch.Stop()
 }
