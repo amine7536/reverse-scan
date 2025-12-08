@@ -1,4 +1,4 @@
-version: 2
+version: "2"
 
 run:
   timeout: 5m
@@ -13,23 +13,15 @@ linters:
     - misspell
     - gocritic
 
-linters-settings:
-  errcheck:
-    check-type-assertions: true
-    check-blank: true
-
-  govet:
-    enable-all: true
-
-  misspell:
-    locale: US
+  settings:
+    errcheck:
+      check-type-assertions: true
+      check-blank: true
+    govet:
+      enable-all: true
+    misspell:
+      locale: US
 
 issues:
   max-issues-per-linter: 0
   max-same-issues: 0
-
-  exclude-rules:
-    # Exclude some linters from running on tests files
-    - path: _test\.go
-      linters:
-        - errcheck

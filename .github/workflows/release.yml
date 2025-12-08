@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 permissions:
   contents: write
@@ -14,62 +14,62 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Set up Go
-      uses: actions/setup-go@v5
-      with:
-        go-version: '1.23'
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
 
-    - name: Cache Go modules
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.cache/go-build
-          ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
 
-    - name: Run tests
-      run: go test -v ./...
+      - name: Run tests
+        run: go test -v ./...
 
-    - name: Build binaries
-      run: |
-        # Linux
-        GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o reverse-scan-linux-amd64
-        GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -o reverse-scan-linux-arm64
+      - name: Build binaries
+        run: |
+          # Linux
+          GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o reverse-scan-linux-amd64
+          GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -o reverse-scan-linux-arm64
 
-        # macOS
-        GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w" -o reverse-scan-darwin-amd64
-        GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w" -o reverse-scan-darwin-arm64
+          # macOS
+          GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w" -o reverse-scan-darwin-amd64
+          GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w" -o reverse-scan-darwin-arm64
 
-        # Windows
-        GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o reverse-scan-windows-amd64.exe
+          # Windows
+          GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o reverse-scan-windows-amd64.exe
 
-        # FreeBSD
-        GOOS=freebsd GOARCH=amd64 go build -ldflags="-s -w" -o reverse-scan-freebsd-amd64
+          # FreeBSD
+          GOOS=freebsd GOARCH=amd64 go build -ldflags="-s -w" -o reverse-scan-freebsd-amd64
 
-    - name: Create checksums
-      run: |
-        sha256sum reverse-scan-* > checksums.txt
+      - name: Create checksums
+        run: |
+          sha256sum reverse-scan-* > checksums.txt
 
-    - name: Create Release
-      uses: softprops/action-gh-release@v2
-      with:
-        draft: false
-        prerelease: false
-        generate_release_notes: true
-        files: |
-          reverse-scan-linux-amd64
-          reverse-scan-linux-arm64
-          reverse-scan-darwin-amd64
-          reverse-scan-darwin-arm64
-          reverse-scan-windows-amd64.exe
-          reverse-scan-freebsd-amd64
-          checksums.txt
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            reverse-scan-linux-amd64
+            reverse-scan-linux-arm64
+            reverse-scan-darwin-amd64
+            reverse-scan-darwin-arm64
+            reverse-scan-windows-amd64.exe
+            reverse-scan-freebsd-amd64
+            checksums.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
