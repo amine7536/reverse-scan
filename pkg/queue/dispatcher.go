@@ -1,3 +1,4 @@
+// Package queue implements a worker pool pattern for concurrent job processing
 package queue
 
 // Dispatcher dispatches jobs to workers

@@ -1,3 +1,4 @@
+// Package utils provides utility functions for IP address manipulation and validation
 package utils
 
 import (

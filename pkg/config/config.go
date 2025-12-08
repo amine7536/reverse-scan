@@ -1,3 +1,4 @@
+// Package config handles configuration loading and validation for reverse-scan
 package config
 
 import (

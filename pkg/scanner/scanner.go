@@ -1,3 +1,4 @@
+// Package scanner performs reverse DNS lookups on IP ranges
 package scanner
 
 import (

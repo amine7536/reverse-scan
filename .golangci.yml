@@ -1,23 +1,17 @@
+version: 2
+
 run:
   timeout: 5m
-  tests: true
-  modules-download-mode: readonly
 
 linters:
   enable:
     - errcheck
-    - gosimple
     - govet
     - ineffassign
     - staticcheck
     - unused
-    - gofmt
-    - goimports
     - misspell
-    - unconvert
-    - unparam
     - gocritic
-    - revive
 
 linters-settings:
   errcheck:
@@ -27,20 +21,10 @@ linters-settings:
   govet:
     enable-all: true
 
-  gofmt:
-    simplify: true
-
-  goimports:
-    local-prefixes: github.com/amine7536/reverse-scan
-
   misspell:
     locale: US
 
-  revive:
-    confidence: 0.8
-
 issues:
-  exclude-use-default: false
   max-issues-per-linter: 0
   max-same-issues: 0
 
@@ -49,4 +33,3 @@ issues:
     - path: _test\.go
       linters:
         - errcheck
-        - unparam
