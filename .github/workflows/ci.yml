@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        go-version: ["1.22", "1.23"]
+        go-version: ["1.25"]
 
     steps:
       - name: Checkout code
@@ -51,7 +51,7 @@ jobs:
         shell: cmd
 
       - name: Upload coverage to Codecov
-        if: matrix.os == 'ubuntu-latest' && matrix.go-version == '1.23'
+        if: matrix.os == 'ubuntu-latest' && matrix.go-version == '1.25'
         uses: codecov/codecov-action@v4
         with:
           file: ./coverage.txt
@@ -70,7 +70,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.23"
+          go-version: "1.25"
 
       - name: Build for Linux
         run: GOOS=linux GOARCH=amd64 go build -v -o reverse-scan-linux-amd64
@@ -110,7 +110,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.23"
+          go-version: "1.25"
 
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v9
