@@ -1,0 +1,62 @@
+name: Tag Version
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Version type (major, minor, patch, or auto)'
+        required: true
+        default: 'auto'
+        type: choice
+        options:
+          - auto
+          - major
+          - minor
+          - patch
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    name: Create Version Tag
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Install svu
+        run: |
+          curl -sL https://github.com/caarlos0/svu/releases/download/v2.3.0/svu_2.3.0_linux_amd64.tar.gz | tar xz
+          sudo mv svu /usr/local/bin/
+
+      - name: Get next version
+        id: version
+        run: |
+          if [ "${{ github.event.inputs.version_type }}" = "auto" ]; then
+            # svu will determine version based on conventional commits
+            NEXT_VERSION=$(svu next --tag-mode=current-branch)
+          else
+            # Use specified version type
+            NEXT_VERSION=$(svu ${{ github.event.inputs.version_type }})
+          fi
+          echo "next_version=$NEXT_VERSION" >> $GITHUB_OUTPUT
+          echo "Next version will be: $NEXT_VERSION"
+
+      - name: Create and push tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a ${{ steps.version.outputs.next_version }} -m "Release ${{ steps.version.outputs.next_version }}"
+          git push origin ${{ steps.version.outputs.next_version }}
+
+      - name: Summary
+        run: |
+          echo "## Version Tag Created" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Version: \`${{ steps.version.outputs.next_version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The release workflow will now be triggered automatically." >> $GITHUB_STEP_SUMMARY

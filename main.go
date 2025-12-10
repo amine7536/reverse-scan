@@ -7,9 +7,9 @@ import (
 	"github.com/amine7536/reverse-scan/cmd"
 )
 
-const (
-	// Version : app version
-	Version = "v0.2.3"
+var (
+	// Version : app version (injected by goreleaser at build time)
+	Version = "dev"
 )
 
 func main() {
