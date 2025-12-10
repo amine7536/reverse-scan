@@ -38,7 +38,7 @@ jobs:
         run: |
           if [ "${{ github.event.inputs.version_type }}" = "auto" ]; then
             # svu will determine version based on conventional commits
-            NEXT_VERSION=$(svu next --tag-mode=current-branch)
+            NEXT_VERSION=$(svu next --tag.mode=current)
           else
             # Use specified version type
             NEXT_VERSION=$(svu ${{ github.event.inputs.version_type }})
