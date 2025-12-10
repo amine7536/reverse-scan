@@ -30,7 +30,7 @@ jobs:
 
       - name: Install svu
         run: |
-          curl -sL https://github.com/caarlos0/svu/releases/download/v2.3.0/svu_2.3.0_linux_amd64.tar.gz | tar xz
+          curl -sL https://github.com/caarlos0/svu/releases/download/v3.3.0/svu_3.3.0_linux_amd64.tar.gz | tar xz
           sudo mv svu /usr/local/bin/
 
       - name: Get next version
