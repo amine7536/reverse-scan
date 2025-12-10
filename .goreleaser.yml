@@ -1,0 +1,155 @@
+# GoReleaser configuration for reverse-scan
+version: 2
+
+before:
+  hooks:
+    # Run tests before building
+    - go test -v ./...
+    # Ensure dependencies are up to date
+    - go mod tidy
+
+builds:
+  - id: reverse-scan
+    main: ./main.go
+    binary: reverse-scan
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s -w
+      - -X main.Version={{.Version}}
+    goos:
+      - linux
+      - darwin
+      - windows
+      - freebsd
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      # FreeBSD arm64 is not commonly used
+      - goos: freebsd
+        goarch: arm64
+
+archives:
+  - id: reverse-scan
+    format: tar.gz
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- .Version }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - README.md
+      - LICENSE*
+
+checksum:
+  name_template: 'checksums.txt'
+  algorithm: sha256
+
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^chore:'
+      - 'merge conflict'
+      - Merge pull request
+      - Merge remote-tracking branch
+      - Merge branch
+  groups:
+    - title: 'New Features'
+      regexp: "^.*feat[(\\w)]*:+.*$"
+      order: 0
+    - title: 'Bug Fixes'
+      regexp: "^.*fix[(\\w)]*:+.*$"
+      order: 1
+    - title: 'Enhancements'
+      regexp: "^.*enhancement[(\\w)]*:+.*$"
+      order: 2
+    - title: 'Documentation'
+      regexp: "^.*docs[(\\w)]*:+.*$"
+      order: 3
+    - title: 'Other Changes'
+      order: 999
+
+release:
+  github:
+    owner: amine7536
+    name: reverse-scan
+  draft: false
+  prerelease: auto
+  mode: replace
+  header: |
+    ## reverse-scan {{ .Version }}
+
+    Welcome to this new release of reverse-scan!
+
+  footer: |
+    ## Installation
+
+    ### Binary Download
+    Download the appropriate binary for your platform from the assets below.
+
+    ### Docker
+    ```bash
+    docker pull ghcr.io/amine7536/reverse-scan:{{ .Version }}
+    ```
+
+    ### Go Install
+    ```bash
+    go install github.com/amine7536/reverse-scan@{{ .Version }}
+    ```
+
+# Docker configuration
+dockers:
+  - image_templates:
+      - "ghcr.io/amine7536/reverse-scan:{{ .Version }}-amd64"
+      - "ghcr.io/amine7536/reverse-scan:latest-amd64"
+    use: buildx
+    dockerfile: Dockerfile.goreleaser
+    build_flag_templates:
+      - "--platform=linux/amd64"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.source=https://github.com/amine7536/reverse-scan"
+
+  - image_templates:
+      - "ghcr.io/amine7536/reverse-scan:{{ .Version }}-arm64"
+      - "ghcr.io/amine7536/reverse-scan:latest-arm64"
+    use: buildx
+    goarch: arm64
+    dockerfile: Dockerfile.goreleaser
+    build_flag_templates:
+      - "--platform=linux/arm64"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.source=https://github.com/amine7536/reverse-scan"
+
+docker_manifests:
+  - name_template: "ghcr.io/amine7536/reverse-scan:{{ .Version }}"
+    image_templates:
+      - "ghcr.io/amine7536/reverse-scan:{{ .Version }}-amd64"
+      - "ghcr.io/amine7536/reverse-scan:{{ .Version }}-arm64"
+
+  - name_template: "ghcr.io/amine7536/reverse-scan:latest"
+    image_templates:
+      - "ghcr.io/amine7536/reverse-scan:latest-amd64"
+      - "ghcr.io/amine7536/reverse-scan:latest-arm64"
+
+# Announce on GitHub Discussions (optional, can be enabled later)
+# announce:
+#   github:
+#     enabled: true
+#     message_template: 'reverse-scan {{ .Tag }} is out! Check it out at {{ .ReleaseURL }}'

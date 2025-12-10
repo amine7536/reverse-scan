@@ -7,14 +7,33 @@ This utility uses the "Dispatcher/Workers" pattern discribed here :
 - https://nesv.github.io/golang/2014/02/25/worker-queues-in-go.html
 - http://marcio.io/2015/07/handling-1-million-requests-per-minute-with-golang/
 
-# Getting Started
+# Installation
 
-Download the binary :
+## Download Binary
+
+Download the latest binary from the [releases page](https://github.com/amine7536/reverse-scan/releases):
 
 ```bash
-wget https://github.com/amine7536/reverse-scan/releases/download/v0.2.1/reverse-scan
+# Example for Linux amd64
+wget https://github.com/amine7536/reverse-scan/releases/latest/download/reverse-scan_Linux_x86_64.tar.gz
+tar xzf reverse-scan_Linux_x86_64.tar.gz
 chmod +x reverse-scan
 ```
+
+## Docker
+
+```bash
+docker pull ghcr.io/amine7536/reverse-scan:latest
+docker run --rm ghcr.io/amine7536/reverse-scan:latest --help
+```
+
+## Go Install
+
+```bash
+go install github.com/amine7536/reverse-scan@latest
+```
+
+# Getting Started
 
 Usage :
 
@@ -69,3 +88,7 @@ You can specify either:
 
 You specify the number of workers with the option `-w`, by default the utility starts with 8 workers.
 You must also specify an output CSV file.
+
+# Development
+
+For information about the release process and how to create new releases, see [RELEASE.md](RELEASE.md).
