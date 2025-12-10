@@ -15,50 +15,94 @@ func TestValidateConfig(t *testing.T) {
 		name    string
 		start   string
 		end     string
+		cidr    string
 		output  string
 		errMsg  string
 		workers int
 		wantErr bool
 	}{
 		{
-			name:    "valid config",
+			name:    "valid config with start/end",
 			start:   "192.168.1.0",
 			end:     "192.168.1.255",
+			cidr:    "",
 			output:  validOutputFile,
 			workers: 8,
 			wantErr: false,
 		},
 		{
-			name:    "missing start IP",
+			name:    "valid config with CIDR",
 			start:   "",
-			end:     "192.168.1.255",
+			end:     "",
+			cidr:    "192.168.1.0/24",
 			output:  validOutputFile,
 			workers: 8,
-			wantErr: true,
-			errMsg:  "Must specify start range",
+			wantErr: false,
 		},
 		{
-			name:    "missing end IP",
-			start:   "192.168.1.0",
+			name:    "missing all range inputs",
+			start:   "",
 			end:     "",
+			cidr:    "",
 			output:  validOutputFile,
 			workers: 8,
 			wantErr: true,
-			errMsg:  "Must specify end range",
+			errMsg:  "must specify either --cidr or --start/--end range",
+		},
+		{
+			name:    "both CIDR and start/end provided",
+			start:   "192.168.1.0",
+			end:     "192.168.1.255",
+			cidr:    "192.168.1.0/24",
+			output:  validOutputFile,
+			workers: 8,
+			wantErr: true,
+			errMsg:  "cannot specify both --cidr and --start/--end range",
+		},
+		{
+			name:    "missing start IP with end",
+			start:   "",
+			end:     "192.168.1.255",
+			cidr:    "",
+			output:  validOutputFile,
+			workers: 8,
+			wantErr: true,
+			errMsg:  "must specify start range",
+		},
+		{
+			name:    "missing end IP with start",
+			start:   "192.168.1.0",
+			end:     "",
+			cidr:    "",
+			output:  validOutputFile,
+			workers: 8,
+			wantErr: true,
+			errMsg:  "must specify end range",
 		},
 		{
 			name:    "missing output file",
 			start:   "192.168.1.0",
 			end:     "192.168.1.255",
+			cidr:    "",
 			output:  "",
 			workers: 8,
 			wantErr: true,
-			errMsg:  "Must specify output file",
+			errMsg:  "must specify output file",
+		},
+		{
+			name:    "invalid CIDR notation",
+			start:   "",
+			end:     "",
+			cidr:    "invalid-cidr",
+			output:  validOutputFile,
+			workers: 8,
+			wantErr: true,
 		},
 		{
 			name:    "invalid start IP",
 			start:   "999.999.999.999",
 			end:     "192.168.1.255",
+			cidr:    "",
 			output:  validOutputFile,
 			workers: 8,
 			wantErr: true,
@@ -67,6 +111,7 @@ func TestValidateConfig(t *testing.T) {
 			name:    "invalid end IP",
 			start:   "192.168.1.0",
 			end:     "not-an-ip",
+			cidr:    "",
 			output:  validOutputFile,
 			workers: 8,
 			wantErr: true,
@@ -75,24 +120,27 @@ func TestValidateConfig(t *testing.T) {
 			name:    "invalid range - different first octet",
 			start:   "192.168.1.0",
 			end:     "10.168.1.255",
+			cidr:    "",
 			output:  validOutputFile,
 			workers: 8,
 			wantErr: true,
-			errMsg:  "Invalid Range",
+			errMsg:  "invalid range: start and end IP must be in the same network",
 		},
 		{
 			name:    "invalid range - end before start",
 			start:   "192.168.10.0",
 			end:     "192.168.1.255",
+			cidr:    "",
 			output:  validOutputFile,
 			workers: 8,
 			wantErr: true,
-			errMsg:  "Invalid Range",
+			errMsg:  "invalid range: end IP must be greater than start IP",
 		},
 		{
 			name:    "invalid output path",
 			start:   "192.168.1.0",
 			end:     "192.168.1.255",
+			cidr:    "",
 			output:  "/nonexistent/directory/output.csv",
 			workers: 8,
 			wantErr: true,
@@ -101,7 +149,7 @@ func TestValidateConfig(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			config, err := validateConfig(tt.start, tt.end, tt.output, tt.workers)
+			config, err := validateConfig(tt.start, tt.end, tt.cidr, tt.output, tt.workers)
 
 			if (err != nil) != tt.wantErr {
 				t.Errorf("validateConfig() error = %v, wantErr %v", err, tt.wantErr)
@@ -162,7 +210,7 @@ func TestValidateConfigCIDRCalculation(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			config, err := validateConfig(tt.start, tt.end, validOutputFile, 8)
+			config, err := validateConfig(tt.start, tt.end, "", validOutputFile, 8)
 			if err != nil {
 				t.Fatalf("validateConfig() unexpected error = %v", err)
 			}
@@ -178,7 +226,7 @@ func TestConfigStruct(t *testing.T) {
 	tmpDir := t.TempDir()
 	validOutputFile := filepath.Join(tmpDir, "output.csv")
 
-	config, err := validateConfig("192.168.1.0", "192.168.1.255", validOutputFile, 16)
+	config, err := validateConfig("192.168.1.0", "192.168.1.255", "", validOutputFile, 16)
 	if err != nil {
 		t.Fatalf("validateConfig() unexpected error = %v", err)
 	}
@@ -202,7 +250,7 @@ func TestValidateConfigFileCreation(t *testing.T) {
 	tmpDir := t.TempDir()
 	outputFile := filepath.Join(tmpDir, "test-output.csv")
 
-	config, err := validateConfig("192.168.1.0", "192.168.1.10", outputFile, 8)
+	config, err := validateConfig("192.168.1.0", "192.168.1.10", "", outputFile, 8)
 	if err != nil {
 		t.Fatalf("validateConfig() unexpected error = %v", err)
 	}
@@ -222,5 +270,59 @@ func TestValidateConfigFileCreation(t *testing.T) {
 	}
 	if err := os.Remove(config.CSV); err != nil {
 		t.Errorf("Failed to remove test file: %v", err)
+	}
+}
+
+// TestValidateConfigWithCIDR verifies CIDR input functionality
+func TestValidateConfigWithCIDR(t *testing.T) {
+	tmpDir := t.TempDir()
+	validOutputFile := filepath.Join(tmpDir, "output.csv")
+
+	tests := []struct {
+		name      string
+		cidr      string
+		wantCIDR  string
+		wantStart string
+		wantEnd   string
+	}{
+		{
+			name:      "class C network",
+			cidr:      "192.168.1.0/24",
+			wantCIDR:  "192.168.1.0/24",
+			wantStart: "192.168.1.0",
+			wantEnd:   "192.168.1.255",
+		},
+		{
+			name:      "class B network",
+			cidr:      "172.16.0.0/16",
+			wantCIDR:  "172.16.0.0/16",
+			wantStart: "172.16.0.0",
+			wantEnd:   "172.16.255.255",
+		},
+		{
+			name:      "small subnet /28",
+			cidr:      "10.0.0.0/28",
+			wantCIDR:  "10.0.0.0/28",
+			wantStart: "10.0.0.0",
+			wantEnd:   "10.0.0.15",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			config, err := validateConfig("", "", tt.cidr, validOutputFile, 8)
+			if err != nil {
+				t.Fatalf("validateConfig() unexpected error = %v", err)
+			}
+			if config.CIDR != tt.wantCIDR {
+				t.Errorf("Config.CIDR = %v, want %v", config.CIDR, tt.wantCIDR)
+			}
+			if config.StartIP.String() != tt.wantStart {
+				t.Errorf("Config.StartIP = %v, want %v", config.StartIP, tt.wantStart)
+			}
+			if config.EndIP.String() != tt.wantEnd {
+				t.Errorf("Config.EndIP = %v, want %v", config.EndIP, tt.wantEnd)
+			}
+		})
 	}
 }

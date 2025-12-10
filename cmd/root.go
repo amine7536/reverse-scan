@@ -25,6 +25,7 @@ func NewRootCmd(v string) *cobra.Command {
 
 	rootCmd.PersistentFlags().StringP("start", "s", "", "ip range start")
 	rootCmd.PersistentFlags().StringP("end", "e", "", "ip range end")
+	rootCmd.PersistentFlags().StringP("cidr", "c", "", "CIDR notation (e.g., 192.168.1.0/24)")
 	rootCmd.PersistentFlags().StringP("output", "o", "", "csv output file")
 	rootCmd.PersistentFlags().IntP("workers", "w", 8, "number of workers")
 
