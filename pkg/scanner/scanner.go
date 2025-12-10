@@ -1,3 +1,4 @@
+// Package scanner performs reverse DNS lookups on IP ranges
 package scanner
 
 import (
@@ -14,35 +15,32 @@ import (
 
 // Start scanner
 func Start(c *config.Config) {
+	hosts, err := utils.GetHosts(c.CIDR)
+	if err != nil {
+		log.Fatalf("Failed to get hosts: %v", err)
+	}
 
-	hosts, _ := utils.GetHosts(c.CIDR)
 	results := make(chan queue.Job)
-	defer close(results)
 
 	log.Printf("Resolving from %v to %v", c.StartIP, c.EndIP)
-	log.Printf("Caluculated CIDR is %s", c.CIDR)
+	log.Printf("Calculated CIDR is %s", c.CIDR)
 	log.Printf("Number of IPs to scan: %v", len(hosts))
 	log.Printf("Starting %v Workers", c.WORKERS)
 
 	file, err := os.Create(c.CSV)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed to create output file: %v", err)
 	}
-	defer file.Close()
 
 	writer := csv.NewWriter(file)
-	defer writer.Flush()
 
 	uiprogress.Start()
-	defer uiprogress.Stop()
 	bar := uiprogress.AddBar(len(hosts))
 	bar.AppendCompleted()
 	bar.PrependElapsed()
 
 	dispatch := queue.NewDispatcher(c.WORKERS, results)
 	dispatch.Run()
-	defer dispatch.Stop()
-	// time.Sleep(time.Second * 10)
 
 	// Send Jobs to Dispatch
 	for _, ip := range hosts {
@@ -51,22 +49,25 @@ func Start(c *config.Config) {
 	}
 
 	// Wait for results
-	r := 0
-resultLoop:
-	for {
-		select {
-		case job := <-results:
-			err := writer.Write(append([]string{job.IP}, job.Names...))
-			if err != nil {
-				log.Fatal(err)
-			}
+	for r := 0; r < len(hosts); r++ {
+		job := <-results
+		if err := writer.Write(append([]string{job.IP}, job.Names...)); err != nil {
 			writer.Flush()
-			bar.Incr()
-			r++
-			if r == len(hosts) {
-				// We got all jobs back, we stop
-				break resultLoop
+			if closeErr := file.Close(); closeErr != nil {
+				log.Printf("Warning: failed to close file: %v", closeErr)
 			}
+			uiprogress.Stop()
+			dispatch.Stop()
+			log.Fatalf("Failed to write result: %v", err)
 		}
+		writer.Flush()
+		bar.Incr()
 	}
+
+	writer.Flush()
+	if err := file.Close(); err != nil {
+		log.Printf("Warning: failed to close file: %v", err)
+	}
+	uiprogress.Stop()
+	dispatch.Stop()
 }

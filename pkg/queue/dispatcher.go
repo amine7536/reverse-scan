@@ -1,13 +1,14 @@
+// Package queue implements a worker pool pattern for concurrent job processing
 package queue
 
-// Dispatcher dispatchs jobs to worker
+// Dispatcher dispatches jobs to workers
 type Dispatcher struct {
-	MaxWorkers  int
 	WorkerPool  chan chan Job
 	JobQueue    chan Job
 	ResultQueue chan Job
 	quit        chan bool
 	Workers     []Worker
+	MaxWorkers  int
 }
 
 // NewDispatcher returns a new dispatcher

@@ -1,3 +1,4 @@
+// Package cmd provides the command-line interface for reverse-scan
 package cmd
 
 import (
@@ -30,7 +31,7 @@ func NewRootCmd(v string) *cobra.Command {
 	return &rootCmd
 }
 
-func run(cmd *cobra.Command, args []string) {
+func run(cmd *cobra.Command, _ []string) {
 	c, err := config.LoadConfig(cmd)
 	if err != nil {
 		log.Fatal(err)

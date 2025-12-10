@@ -1,3 +1,4 @@
+// Package config handles configuration loading and validation for reverse-scan
 package config
 
 import (
@@ -11,10 +12,10 @@ import (
 
 // Config the application's configuration
 type Config struct {
-	StartIP net.IP
-	EndIP   net.IP
 	CIDR    string
 	CSV     string
+	StartIP net.IP
+	EndIP   net.IP
 	WORKERS int
 }
 
@@ -49,17 +50,17 @@ func LoadConfig(cmd *cobra.Command) (*Config, error) {
 	return config, nil
 }
 
-func validateConfig(start string, end string, output string, workers int) (*Config, error) {
+func validateConfig(start, end, output string, workers int) (*Config, error) {
 	if start == "" {
-		return nil, fmt.Errorf("Must specify start range")
+		return nil, fmt.Errorf("must specify start range")
 	}
 
 	if end == "" {
-		return nil, fmt.Errorf("Must specify end range")
+		return nil, fmt.Errorf("must specify end range")
 	}
 
 	if output == "" {
-		return nil, fmt.Errorf("Must specify output file")
+		return nil, fmt.Errorf("must specify output file")
 	}
 
 	startIP, err := utils.IsValidIP(start)
@@ -73,15 +74,15 @@ func validateConfig(start string, end string, output string, workers int) (*Conf
 	}
 
 	if startIP[0] != endIP[0] {
-		return nil, fmt.Errorf("Invalid Range")
+		return nil, fmt.Errorf("invalid range: start and end IP must be in the same network")
 	}
 
 	if endIP[2] < startIP[2] {
-		return nil, fmt.Errorf("Invalid Range")
+		return nil, fmt.Errorf("invalid range: end IP must be greater than start IP")
 	}
 
 	if !utils.IsValidPath(output) {
-		return nil, fmt.Errorf("Invalid output file : %s", output)
+		return nil, fmt.Errorf("invalid output file: %q", output)
 	}
 
 	config := Config{

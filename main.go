@@ -1,3 +1,4 @@
+// Package main is the entry point for the reverse-scan application
 package main
 
 import (

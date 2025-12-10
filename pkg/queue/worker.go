@@ -4,6 +4,7 @@ import (
 	"github.com/amine7536/reverse-scan/pkg/utils"
 )
 
+// Job represents a DNS lookup job
 type Job struct {
 	IP    string
 	Names []string
@@ -11,11 +12,11 @@ type Job struct {
 
 // Worker executes a reverse lookup on a slice of ips
 type Worker struct {
-	ID            int
 	WorkerPool    chan chan Job
 	JobChannel    chan Job
 	ResultChannel chan Job
 	quit          chan bool
+	ID            int
 }
 
 // NewWorker returns a new Worker
@@ -39,7 +40,10 @@ func (w Worker) Start() {
 			select {
 			case job := <-w.JobChannel:
 				// Send the return of fn in the ResultChannel
-				job.Names, _ = utils.ResolveName(job.IP)
+				names, err := utils.ResolveName(job.IP)
+				if err == nil {
+					job.Names = names
+				}
 				w.ResultChannel <- job
 
 			case <-w.quit:
