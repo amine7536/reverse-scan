@@ -82,19 +82,19 @@ jobs:
         run: GOOS=windows GOARCH=amd64 go build -v -o reverse-scan-windows-amd64.exe
 
       - name: Upload Linux artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: reverse-scan-linux-amd64
           path: reverse-scan-linux-amd64
 
       - name: Upload macOS artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: reverse-scan-darwin-amd64
           path: reverse-scan-darwin-amd64
 
       - name: Upload Windows artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: reverse-scan-windows-amd64
           path: reverse-scan-windows-amd64.exe
