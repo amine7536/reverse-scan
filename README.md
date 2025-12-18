@@ -23,8 +23,8 @@ chmod +x reverse-scan
 ## Docker
 
 ```bash
-docker pull ghcr.io/amine7536/reverse-scan:latest
-docker run --rm ghcr.io/amine7536/reverse-scan:latest --help
+docker pull amine7536/reverse-scan:latest
+docker run --rm amine7536/reverse-scan:latest --help
 ```
 
 ## Go Install

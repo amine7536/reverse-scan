@@ -60,9 +60,9 @@ Each release includes:
 - **Binaries**: For multiple platforms and architectures
 - **Archives**: `.tar.gz` (Unix) and `.zip` (Windows)
 - **Checksums**: SHA256 checksums in `checksums.txt`
-- **Docker Images**: Multi-arch images pushed to `ghcr.io/amine7536/reverse-scan`
-  - `ghcr.io/amine7536/reverse-scan:latest`
-  - `ghcr.io/amine7536/reverse-scan:v1.0.0`
+- **Docker Images**: Multi-arch images pushed to Docker Hub `amine7536/reverse-scan`
+  - `amine7536/reverse-scan:latest`
+  - `amine7536/reverse-scan:v1.0.0`
 
 ## Local Testing
 
@@ -94,14 +94,14 @@ When using goreleaser, the version is automatically injected from the git tag.
 
 ## Docker Images
 
-Docker images are built for both amd64 and arm64 architectures and published to GitHub Container Registry:
+Docker images are built for both amd64 and arm64 architectures and published to Docker Hub:
 
 ```bash
 # Pull latest
-docker pull ghcr.io/amine7536/reverse-scan:latest
+docker pull amine7536/reverse-scan:latest
 
 # Pull specific version
-docker pull ghcr.io/amine7536/reverse-scan:v1.0.0
+docker pull amine7536/reverse-scan:v1.0.0
 ```
 
 ## Changelog
