@@ -23,7 +23,7 @@ Runs on every push and pull request to main branches.
 - Push to main, master, or develop branches
 - Pull requests to main, master, or develop branches
 
-### Release Workflow (`release.yml`)
+### Build Workflow (`build.yml`)
 
 Handles all builds and releases using GoReleaser.
 

@@ -7,7 +7,7 @@ This project uses [goreleaser](https://goreleaser.com/) and [svu](https://github
 - **goreleaser**: Handles building binaries for multiple platforms, creating archives, checksums, Docker images, and GitHub releases
 - **svu**: Semantic version utility that determines the next version based on git tags and conventional commits
 
-## Release Workflow
+## Build and Release
 
 ### Option 1: Manual Tag Creation
 
@@ -17,7 +17,7 @@ This project uses [goreleaser](https://goreleaser.com/) and [svu](https://github
    git push origin v1.0.0
    ```
 
-2. The release workflow will automatically trigger and:
+2. The build workflow will automatically trigger and:
    - Build binaries for Linux, macOS, Windows, and FreeBSD (amd64 and arm64)
    - Create archives and checksums
    - Build multi-arch Docker images
@@ -36,7 +36,7 @@ This project uses [goreleaser](https://goreleaser.com/) and [svu](https://github
 4. The workflow will:
    - Calculate the next version using svu
    - Create and push the tag
-   - Automatically trigger the release workflow
+   - Automatically trigger the build workflow
 
 ## Conventional Commits
 
