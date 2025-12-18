@@ -32,7 +32,10 @@ builds:
 
 archives:
   - id: reverse-scan
-    format: tar.gz
+    formats:
+      - tar.gz
+      - zip
+    rlcp: true
     name_template: >-
       {{ .ProjectName }}_
       {{- .Version }}_
@@ -41,9 +44,6 @@ archives:
       {{- else if eq .Arch "386" }}i386
       {{- else }}{{ .Arch }}{{ end }}
       {{- if .Arm }}v{{ .Arm }}{{ end }}
-    format_overrides:
-      - goos: windows
-        format: zip
     files:
       - README.md
       - LICENSE*
@@ -109,48 +109,23 @@ release:
     ```
 
 # Docker configuration
-dockers:
-  - image_templates:
-      - "amine7536/reverse-scan:{{ .Version }}-amd64"
-      - "amine7536/reverse-scan:latest-amd64"
-    use: buildx
+dockers_v2:
+  - id: reverse-scan
     dockerfile: Dockerfile
+    use: buildx
+    skip_push: auto
     build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.source=https://github.com/amine7536/reverse-scan"
       - "--platform=linux/amd64"
-      - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.title={{.ProjectName}}"
-      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-      - "--label=org.opencontainers.image.version={{.Version}}"
-      - "--label=org.opencontainers.image.source=https://github.com/amine7536/reverse-scan"
-    skip_push: auto
-
-  - image_templates:
-      - "amine7536/reverse-scan:{{ .Version }}-arm64"
-      - "amine7536/reverse-scan:latest-arm64"
-    use: buildx
-    goarch: arm64
-    dockerfile: Dockerfile
-    build_flag_templates:
       - "--platform=linux/arm64"
-      - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.title={{.ProjectName}}"
-      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-      - "--label=org.opencontainers.image.version={{.Version}}"
-      - "--label=org.opencontainers.image.source=https://github.com/amine7536/reverse-scan"
-    skip_push: auto
-
-docker_manifests:
-  - name_template: "amine7536/reverse-scan:{{ .Version }}"
     image_templates:
-      - "amine7536/reverse-scan:{{ .Version }}-amd64"
-      - "amine7536/reverse-scan:{{ .Version }}-arm64"
-    skip_push: auto
-
-  - name_template: "amine7536/reverse-scan:latest"
-    image_templates:
-      - "amine7536/reverse-scan:latest-amd64"
-      - "amine7536/reverse-scan:latest-arm64"
-    skip_push: auto
+      - "amine7536/reverse-scan:{{ .Version }}"
+      - "amine7536/reverse-scan:latest"
 
 # Announce on GitHub Discussions (optional, can be enabled later)
 # announce:
