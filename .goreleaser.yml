@@ -114,7 +114,7 @@ dockers:
       - "amine7536/reverse-scan:{{ .Version }}-amd64"
       - "amine7536/reverse-scan:latest-amd64"
     use: buildx
-    dockerfile: Dockerfile.goreleaser
+    dockerfile: Dockerfile
     build_flag_templates:
       - "--platform=linux/amd64"
       - "--label=org.opencontainers.image.created={{.Date}}"
@@ -129,7 +129,7 @@ dockers:
       - "amine7536/reverse-scan:latest-arm64"
     use: buildx
     goarch: arm64
-    dockerfile: Dockerfile.goreleaser
+    dockerfile: Dockerfile
     build_flag_templates:
       - "--platform=linux/arm64"
       - "--label=org.opencontainers.image.created={{.Date}}"
