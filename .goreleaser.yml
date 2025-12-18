@@ -35,7 +35,6 @@ archives:
     formats:
       - tar.gz
       - zip
-    rlcp: true
     name_template: >-
       {{ .ProjectName }}_
       {{- .Version }}_
@@ -112,20 +111,21 @@ release:
 dockers_v2:
   - id: reverse-scan
     dockerfile: Dockerfile
-    use: buildx
+    images:
+      - "amine7536/reverse-scan"
+    tags:
+      - "{{ .Version }}"
+      - "latest"
+    platforms:
+      - linux/amd64
+      - linux/arm64
+    labels:
+      org.opencontainers.image.created: "{{.Date}}"
+      org.opencontainers.image.title: "{{.ProjectName}}"
+      org.opencontainers.image.revision: "{{.FullCommit}}"
+      org.opencontainers.image.version: "{{.Version}}"
+      org.opencontainers.image.source: "https://github.com/amine7536/reverse-scan"
     skip_push: auto
-    build_flag_templates:
-      - "--pull"
-      - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.title={{.ProjectName}}"
-      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-      - "--label=org.opencontainers.image.version={{.Version}}"
-      - "--label=org.opencontainers.image.source=https://github.com/amine7536/reverse-scan"
-      - "--platform=linux/amd64"
-      - "--platform=linux/arm64"
-    image_templates:
-      - "amine7536/reverse-scan:{{ .Version }}"
-      - "amine7536/reverse-scan:latest"
 
 # Announce on GitHub Discussions (optional, can be enabled later)
 # announce:
