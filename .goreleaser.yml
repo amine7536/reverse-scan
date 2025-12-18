@@ -32,7 +32,9 @@ builds:
 
 archives:
   - id: reverse-scan
-    format: tar.gz
+    formats:
+      - tar.gz
+      - zip
     name_template: >-
       {{ .ProjectName }}_
       {{- .Version }}_
@@ -41,9 +43,6 @@ archives:
       {{- else if eq .Arch "386" }}i386
       {{- else }}{{ .Arch }}{{ end }}
       {{- if .Arm }}v{{ .Arm }}{{ end }}
-    format_overrides:
-      - goos: windows
-        format: zip
     files:
       - README.md
       - LICENSE*
@@ -100,7 +99,7 @@ release:
 
     ### Docker
     ```bash
-    docker pull ghcr.io/amine7536/reverse-scan:{{ .Version }}
+    docker pull amine7536/reverse-scan:{{ .Version }}
     ```
 
     ### Go Install
@@ -109,44 +108,23 @@ release:
     ```
 
 # Docker configuration
-dockers:
-  - image_templates:
-      - "ghcr.io/amine7536/reverse-scan:{{ .Version }}-amd64"
-      - "ghcr.io/amine7536/reverse-scan:latest-amd64"
-    use: buildx
-    dockerfile: Dockerfile.goreleaser
-    build_flag_templates:
-      - "--platform=linux/amd64"
-      - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.title={{.ProjectName}}"
-      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-      - "--label=org.opencontainers.image.version={{.Version}}"
-      - "--label=org.opencontainers.image.source=https://github.com/amine7536/reverse-scan"
-
-  - image_templates:
-      - "ghcr.io/amine7536/reverse-scan:{{ .Version }}-arm64"
-      - "ghcr.io/amine7536/reverse-scan:latest-arm64"
-    use: buildx
-    goarch: arm64
-    dockerfile: Dockerfile.goreleaser
-    build_flag_templates:
-      - "--platform=linux/arm64"
-      - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.title={{.ProjectName}}"
-      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-      - "--label=org.opencontainers.image.version={{.Version}}"
-      - "--label=org.opencontainers.image.source=https://github.com/amine7536/reverse-scan"
-
-docker_manifests:
-  - name_template: "ghcr.io/amine7536/reverse-scan:{{ .Version }}"
-    image_templates:
-      - "ghcr.io/amine7536/reverse-scan:{{ .Version }}-amd64"
-      - "ghcr.io/amine7536/reverse-scan:{{ .Version }}-arm64"
-
-  - name_template: "ghcr.io/amine7536/reverse-scan:latest"
-    image_templates:
-      - "ghcr.io/amine7536/reverse-scan:latest-amd64"
-      - "ghcr.io/amine7536/reverse-scan:latest-arm64"
+dockers_v2:
+  - id: reverse-scan
+    dockerfile: Dockerfile
+    images:
+      - "amine7536/reverse-scan"
+    tags:
+      - "{{ .Version }}"
+      - "latest"
+    platforms:
+      - linux/amd64
+      - linux/arm64
+    labels:
+      org.opencontainers.image.created: "{{.Date}}"
+      org.opencontainers.image.title: "{{.ProjectName}}"
+      org.opencontainers.image.revision: "{{.FullCommit}}"
+      org.opencontainers.image.version: "{{.Version}}"
+      org.opencontainers.image.source: "https://github.com/amine7536/reverse-scan"
 
 # Announce on GitHub Discussions (optional, can be enabled later)
 # announce:

@@ -23,9 +23,9 @@ Runs on every push and pull request to main branches.
 - Push to main, master, or develop branches
 - Pull requests to main, master, or develop branches
 
-### Release Workflow (`release.yml`)
+### Build Workflow (`build.yml`)
 
-Automatically creates releases when version tags are pushed.
+Handles all builds and releases using GoReleaser.
 
 **Features:**
 
@@ -37,10 +37,15 @@ Automatically creates releases when version tags are pushed.
   - FreeBSD (amd64)
 - Generates SHA256 checksums
 - Creates GitHub releases with release notes
+- Builds and publishes multi-platform Docker images (amd64, arm64) to Docker Hub
+- Uses snapshot mode for non-tag builds (no push)
 
 **Triggers:**
 
-- Push tags matching `v*` (e.g., v1.0.0)
+- Push to main, master, or develop branches (snapshot build, no push)
+- Push tags matching `v*` (full release with GitHub release and Docker push)
+- Pull requests (snapshot build, no push)
+- Manual workflow dispatch
 
 **Usage:**
 
@@ -49,28 +54,10 @@ git tag -a v1.0.0 -m "Release version 1.0.0"
 git push origin v1.0.0
 ```
 
-### Docker Workflow (`docker.yml`)
+**Container Registry:**
 
-Builds and publishes Docker images.
-
-**Features:**
-
-- Builds multi-platform Docker images (amd64, arm64)
-- Pushes to GitHub Container Registry (ghcr.io)
-- Optionally pushes to Docker Hub on release tags
-- Uses layer caching for faster builds
-- Tags images based on branch/tag names
-
-**Triggers:**
-
-- Push to main, master, or develop branches
-- Push tags matching `v*`
-- Pull requests (build only, no push)
-
-**Container Registries:**
-
-- GitHub Container Registry: `ghcr.io/amine7536/reverse-scan`
-- Docker Hub (on releases): Requires `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` secrets
+- Docker Hub: `amine7536/reverse-scan`
+- Requires `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` secrets for pushing images
 
 ## Configuration Files
 

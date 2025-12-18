@@ -59,4 +59,4 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Version: \`${{ steps.version.outputs.next_version }}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "The release workflow will now be triggered automatically." >> $GITHUB_STEP_SUMMARY
+          echo "The build workflow will now be triggered automatically." >> $GITHUB_STEP_SUMMARY
