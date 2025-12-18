@@ -108,7 +108,7 @@ release:
     go install github.com/amine7536/reverse-scan@{{ .Version }}
     ```
 
-# Docker configuration - Push to Docker Hub only
+# Docker configuration
 dockers:
   - image_templates:
       - "amine7536/reverse-scan:{{ .Version }}-amd64"
