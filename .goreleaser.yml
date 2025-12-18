@@ -125,7 +125,6 @@ dockers_v2:
       org.opencontainers.image.revision: "{{.FullCommit}}"
       org.opencontainers.image.version: "{{.Version}}"
       org.opencontainers.image.source: "https://github.com/amine7536/reverse-scan"
-    skip_push: auto
 
 # Announce on GitHub Discussions (optional, can be enabled later)
 # announce:
